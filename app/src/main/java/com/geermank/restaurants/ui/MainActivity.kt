@@ -15,31 +15,38 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.geermank.restaurants.R
 import com.geermank.restaurants.utils.Constants
+import com.geermank.restaurants.utils.LocationManager
 import com.geermank.restaurants.viewmodel.BaseViewModelFactory
 import com.geermank.restaurants.viewmodel.MainViewModel
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LocationManager.LocationCallback {
 
-    private val viewModel: MainViewModel by lazy {
+    private lateinit var viewModel: MainViewModel
 
-        ViewModelProviders.of(this,
-            BaseViewModelFactory{ MainViewModel(getSharedPreferences(Constants.APP_PREFS, Context.MODE_PRIVATE)) })
-            .get(MainViewModel::class.java)
-
-    }
+    private val locationManager: LocationManager by lazy { initLocationManager() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        initViewModel()
 
         // Renews token every time the user launches the app
         // An optimization would be to request it only when we detect
         // that our locally saved token has expired
         renewToken()
     }
+
+    private fun initViewModel(){
+        viewModel = ViewModelProviders.of(this,
+                BaseViewModelFactory{ MainViewModel(getSharedPreferences(Constants.APP_PREFS, Context.MODE_PRIVATE)) })
+                .get(MainViewModel::class.java)
+    }
+
+    private fun initLocationManager(): LocationManager = LocationManager(this)
 
     private fun renewToken(){
         viewModel.renewToken().observe(this, Observer { response ->
@@ -49,8 +56,7 @@ class MainActivity : AppCompatActivity() {
                 return@Observer
             }
 
-            verifyLocationSettings()
-
+            locationManager.checkLocationSettings()
         })
     }
 
@@ -73,88 +79,35 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    /**
-     * Verifies if current device settings satisfies our needs
-     *
-     * Punctually, it verifies whether the GPS is active or not
-     */
-    private fun verifyLocationSettings(){
-
-        val locationRequest = getLocationRequest()
-
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-
-        val client = LocationServices.getSettingsClient(this)
-        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-
-        task.addOnSuccessListener {
-
-            if (locationPermissionGranted()){
-                getLastKnownLocation()
-            }else{
-                requestLocationPermissions()
-            }
-
-        }.addOnFailureListener{ ex ->
-
-            if (ex is ResolvableApiException){
-                ex.startResolutionForResult(this, Constants.RC_CHECK_SETTINGS)
-            }
-
+    override fun onClientSettingsError(ex: Exception) {
+        if (ex is ResolvableApiException){
+            ex.startResolutionForResult(this, Constants.RC_CHECK_SETTINGS)
         }
     }
 
-    private fun getLocationRequest(): LocationRequest {
-        return LocationRequest.create().apply {
-            interval = 10000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
+    override fun onLocationPermissionsNeeded() {
+        requestLocationPermissions()
     }
 
-    private fun locationPermissionGranted(): Boolean =
-        ActivityCompat.checkSelfPermission(this,
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    override fun onLocationObtained(location: Location) {
+
+    }
 
     private fun requestLocationPermissions() =
         ActivityCompat.requestPermissions(this,
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
             Constants.RC_LOCATION_PERMISSION)
 
-
-    private fun getLastKnownLocation() {
-
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-
-            if (location == null){
-                // Last location is not know because it may be the first time the device
-                // requests its location (new device, restored from factory)
-                getLocation()
-                return@addOnSuccessListener
-            }
-
-            viewModel.storeLocation(location.latitude,location.longitude)
-            Toast.makeText(this,"Success",Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun getLocation(){
-
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == Constants.RC_CHECK_SETTINGS){
-
-            if(resultCode == Activity.RESULT_OK){
-                getLastKnownLocation()
+            if (resultCode == Activity.RESULT_OK){
+                locationManager.verifyLocationPermissions()
             }else{
-                verifyLocationSettings()
+                // Can't continue without GPS ON
+                locationManager.checkLocationSettings()
             }
-
         }
     }
 
@@ -167,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == Constants.RC_LOCATION_PERMISSION){
 
             if (permissions.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                getLastKnownLocation()
+                locationManager.getLastKnownLocation()
             }else{
                 // Can't continue without location
                 requestLocationPermissions()
