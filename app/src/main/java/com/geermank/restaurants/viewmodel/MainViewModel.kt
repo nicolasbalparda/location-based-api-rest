@@ -4,8 +4,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.geermank.restaurants.repository.RestaurantsRepository
-import com.geermank.restaurants.repository.models.TokenResponse
-
+import com.geermank.restaurants.repository.models.AuthResponseWrapper
 
 class MainViewModel(
     preferences: SharedPreferences
@@ -16,7 +15,7 @@ class MainViewModel(
     private var latitude = 0.0
     private var longitude = 0.0
 
-    fun renewToken(): LiveData<TokenResponse>{
+    fun renewToken(): LiveData<AuthResponseWrapper>{
         return restaurantsRepository.refreshToken()
     }
 

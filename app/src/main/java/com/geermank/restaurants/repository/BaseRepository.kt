@@ -3,14 +3,14 @@ package com.geermank.restaurants.repository
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.geermank.restaurants.R
+import com.geermank.restaurants.repository.models.AuthResponseWrapper
 import com.geermank.restaurants.repository.models.Token
-import com.geermank.restaurants.repository.models.TokenResponse
+import com.geermank.restaurants.utils.ApiConstants
 import com.geermank.restaurants.utils.Constants
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.moshi.MoshiConverterFactory
+
 
 /**
  * Base class to any other kind of repository that we will create. Its purpose is to
@@ -31,7 +31,7 @@ open class BaseRepository(
     }
 
     private var retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(Constants.BASE_URL)
+        .baseUrl(ApiConstants.BASE_URL)
         .addConverterFactory(MoshiConverterFactory.create())
         .build()
 
@@ -40,28 +40,29 @@ open class BaseRepository(
         return retrofit.create(ApiService::class.java)
     }
 
-    fun refreshToken(): LiveData<TokenResponse>{
+    fun refreshToken(): LiveData<AuthResponseWrapper>{
 
-        val tokenResponse = MutableLiveData<TokenResponse>()
+        val tokenResponse = MutableLiveData<AuthResponseWrapper>()
 
-        getApiService().getToken(Constants.CLIENT_ID,Constants.CLIENT_SECRET)
+        getApiService().getToken(ApiConstants.CLIENT_ID,ApiConstants.CLIENT_SECRET)
             .enqueue(object : Callback<Token> {
 
                 override fun onFailure(call: Call<Token>, t: Throwable) {
-                    val res = TokenResponse(t.localizedMessage)
+                    val res = AuthResponseWrapper(t.message, R.string.request_error_failed)
                     tokenResponse.postValue(res)
                 }
 
                 override fun onResponse(call: Call<Token>, response: Response<Token>) {
 
-                    val res = TokenResponse(response.message(),response.code())
+                    val res = AuthResponseWrapper()
 
                     if (response.isSuccessful){
                         preferences.edit()
                             .putString(KEY_TOKEN,response.body()!!.token)
                             .apply()
-
-                        res.error = false
+                    }else{
+                        res.localizedMessage = getLocalizedResponseMessage(response.code())
+                        res.exception = response.message()
                     }
 
                     tokenResponse.postValue(res)
@@ -73,5 +74,22 @@ open class BaseRepository(
     }
 
     fun getToken():String? = preferences.getString(KEY_TOKEN,null)
+
+    /**
+     * Get localized message resource from API Http response code
+     *
+     * This messages are generic, based on Http Group
+     */
+    fun getLocalizedResponseMessage(code: Int): Int{
+
+        return when(code){
+            in 200..299 -> R.string.request_successful
+            in 300..399 -> R.string.request_redirecting
+            in 400..499 -> R.string.request_error_client_problem
+            in 500..599 -> R.string.request_error_server_problem
+
+            else -> R.string.request_error_failed
+        }
+    }
 
 }

@@ -1,5 +1,13 @@
 <resources>
     <string name="app_name">Restaurants</string>
+
+    <string name="request_successful">Datos obtenidos con éxito</string>
+    <string name="request_redirecting">Redireccionando…</string> <!-- NOT USED -->
+    <string name="request_error_failed">¡Tuvimos un problema para obtener los datos! Por favor, comprueba tu conexión a internet</string>
+    <string name="request_error_client_problem">¡Ops! Parece que hay algo mal con esta solicitud</string>
+    <string name="request_error_server_problem">¡Ops! Parece que hay un error con el servicio. Por favor, intente nuevamente más tarde</string>
+
     <string name="main_activity_fetch_token_error_title">Error</string>
     <string name="main_activity_fetch_token_error_retry">Reintentar</string>
+
 </resources>

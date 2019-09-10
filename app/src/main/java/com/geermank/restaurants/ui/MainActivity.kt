@@ -23,12 +23,6 @@ import com.google.android.gms.tasks.Task
 
 class MainActivity : AppCompatActivity() {
 
-    companion object{
-        // Requests code for settings verification and location permission
-        private const val RC_CHECK_SETTINGS = 111
-        private const val RC_LOCATION_PERMISSION = 112
-    }
-
     private val viewModel: MainViewModel by lazy {
 
         ViewModelProviders.of(this,
@@ -50,8 +44,8 @@ class MainActivity : AppCompatActivity() {
     private fun renewToken(){
         viewModel.renewToken().observe(this, Observer { response ->
 
-            if (response.error) {
-                showError(response.message,response.code)
+            if (response.exception != null){
+                showError(response.localizedMessage!!)
                 return@Observer
             }
 
@@ -60,11 +54,11 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showError(message: String, code: Int){
+    private fun showError(message: Int){
 
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.main_activity_fetch_token_error_title)
-            .setMessage("$message $code")
+            .setMessage(message)
             .setPositiveButton(R.string.main_activity_fetch_token_error_retry){ dialog, _ ->
                 dialog.dismiss()
 
@@ -105,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         }.addOnFailureListener{ ex ->
 
             if (ex is ResolvableApiException){
-                ex.startResolutionForResult(this, RC_CHECK_SETTINGS)
+                ex.startResolutionForResult(this, Constants.RC_CHECK_SETTINGS)
             }
 
         }
@@ -118,7 +112,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun locationPermissionGranted(): Boolean =
         ActivityCompat.checkSelfPermission(this,
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -126,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestLocationPermissions() =
         ActivityCompat.requestPermissions(this,
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            RC_LOCATION_PERMISSION)
+            Constants.RC_LOCATION_PERMISSION)
 
 
     private fun getLastKnownLocation() {
@@ -154,7 +147,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RC_CHECK_SETTINGS){
+        if (requestCode == Constants.RC_CHECK_SETTINGS){
 
             if(resultCode == Activity.RESULT_OK){
                 getLastKnownLocation()
@@ -171,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
 
-        if (requestCode == RC_LOCATION_PERMISSION){
+        if (requestCode == Constants.RC_LOCATION_PERMISSION){
 
             if (permissions.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 getLastKnownLocation()
