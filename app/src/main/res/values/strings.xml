@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Restaurants</string>
+    <string name="main_activity_fetch_token_error_title">Error</string>
+    <string name="main_activity_fetch_token_error_retry">Reintentar</string>
+</resources>
