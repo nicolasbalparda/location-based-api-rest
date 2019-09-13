@@ -35,6 +35,8 @@ dependencies {
     def location_version = '17.0.0'
     def lifecycle_version = '2.1.0'
     def retrofit_version = '2.6.1'
+    def material_version = '1.1.0-alpha10'
+    def picasso_version = '2.71828'
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
@@ -45,4 +47,11 @@ dependencies {
     // Retrofit and Moshi converter
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
+
+    // Material design
+    implementation "com.google.android.material:material:$material_version"
+
+    // Picasso
+    implementation "com.squareup.picasso:picasso:$picasso_version"
+
 }

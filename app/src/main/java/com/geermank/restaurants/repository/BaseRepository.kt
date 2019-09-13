@@ -4,10 +4,10 @@ import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.geermank.restaurants.R
-import com.geermank.restaurants.repository.models.AuthResponseWrapper
+import com.geermank.restaurants.repository.apimodels.AuthResponseWrapper
 import com.geermank.restaurants.repository.models.Token
 import com.geermank.restaurants.utils.ApiConstants
-import com.geermank.restaurants.utils.Constants
+import okhttp3.OkHttpClient
 import retrofit2.*
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -32,6 +32,7 @@ open class BaseRepository(
 
     private var retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(ApiConstants.BASE_URL)
+        .client(createClient())
         .addConverterFactory(MoshiConverterFactory.create())
         .build()
 
@@ -48,7 +49,10 @@ open class BaseRepository(
             .enqueue(object : Callback<Token> {
 
                 override fun onFailure(call: Call<Token>, t: Throwable) {
-                    val res = AuthResponseWrapper(t.message, R.string.request_error_failed)
+                    val res = AuthResponseWrapper(
+                        t.message,
+                        R.string.request_error_failed
+                    )
                     tokenResponse.postValue(res)
                 }
 
@@ -73,12 +77,13 @@ open class BaseRepository(
         return tokenResponse
     }
 
-    fun getToken():String? = preferences.getString(KEY_TOKEN,null)
+    fun getToken():String? = preferences.getString(KEY_TOKEN,"")
 
     /**
      * Get localized message resource from API Http response code
      *
-     * This messages are generic, based on Http Group
+     * This messages are generic, based on Http Group. Ideally we should
+     * specify a different message for each common situation
      */
     fun getLocalizedResponseMessage(code: Int): Int{
 
@@ -90,6 +95,24 @@ open class BaseRepository(
 
             else -> R.string.request_error_failed
         }
+    }
+
+    /**
+     * Use interceptor to avoid including the token in every request we make manually
+     */
+    private fun createClient(): OkHttpClient {
+
+        val token = getToken() ?: ""
+
+        val clientBuilder = OkHttpClient.Builder().addInterceptor { chain ->
+            val newRequest = chain.request().newBuilder()
+                .addHeader("Authorization",token)
+                .build()
+
+            chain.proceed(newRequest)
+        }
+
+        return clientBuilder.build()
     }
 
 }
