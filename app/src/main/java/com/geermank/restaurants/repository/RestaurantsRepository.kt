@@ -31,7 +31,7 @@ class RestaurantsRepository(
 
     private fun buildParamsForMainActivity(latitude: Double, longitude: Double, offset: Int): HashMap<String,Any>{
         val point = "$latitude,$longitude"
-        val country = 3 //TODO Remove hardcoded country
+        val country = 1 //TODO Remove hardcoded country
         val max = 20
         val fields = "name,headerImage,deliveryTime,generalScore,shippingAmount,allCategories,coordinates"
 
