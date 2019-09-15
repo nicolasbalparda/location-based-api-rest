@@ -1,20 +1,32 @@
 <resources>
     <string name="app_name">Restaurants Finder</string>
 
+    <!-- General strings -->
+    <string name="delivery">Envío</string>
+    <string name="dot">"\u2022"</string>
+    <string name="minutes_short">min</string>
+    <string name="main_activity_see_results_map">Ver ubicación</string>
+    <string name="title_activity_maps">Maps</string>
+    <string name="your_location">Tu ubicación</string>
+
+    <!-- Requests result strings -->
     <string name="request_successful">Datos obtenidos con éxito</string>
     <string name="request_redirecting">Redireccionando…</string> <!-- NOT USED -->
     <string name="request_error_failed">¡Tuvimos un problema para obtener los datos! Por favor, comprueba tu conexión a internet</string>
     <string name="request_error_client_problem">¡Ops! Parece que hay algo mal con esta solicitud</string>
     <string name="request_error_server_problem">¡Ops! Parece que hay un error con el servicio. Por favor, intente nuevamente más tarde</string>
 
-    <!-- View strings -->
+    <!-- MainActivity strings -->
+    <string name="main_activity_title">Restaurantes cercanos</string>
     <string name="main_activity_fetch_token_error_title">Error</string>
     <string name="main_activity_fetch_token_error_retry">Reintentar</string>
 
-    <!-- General strings -->
-    <string name="delivery">Envío</string>
-    <string name="dot">"\u2022"</string>
-    <string name="minutes_short">min</string>
-    <string name="main_activity_see_results_map">Ver ubicación</string>
+    <!-- MapsActivity strings -->
+    <string name="maps_activity_title_confirm_exact_location">Confirma tu ubicación exacta</string>
+    <string name="maps_activity_title_nearby_restaurants">Restauntes cercanos</string>
+    <string name="maps_activity_tv_confirm_location_title">¿Es esta tu ubicación?</string>
+    <string name="maps_activity_tv_confirm_location_description">Necesitamos confirmar tu ubicación para una mejor experiencia</string>
+    <string name="maps_activity_btn_confirm_location">Confirmar ubicación</string>
+    <string name="change_location">Modificar mi ubicación</string>
 
 </resources>

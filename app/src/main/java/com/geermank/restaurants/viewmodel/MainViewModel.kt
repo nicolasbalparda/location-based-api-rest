@@ -8,6 +8,10 @@ import com.geermank.restaurants.repository.RestaurantsRepository
 import com.geermank.restaurants.repository.apimodels.AuthResponseWrapper
 import com.geermank.restaurants.repository.apimodels.DataResponseWrapper
 import com.geermank.restaurants.repository.models.Restaurant
+import com.geermank.restaurants.utils.MoshiUtils
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -30,6 +34,8 @@ class MainViewModel(
     private var offset: Int = 0
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
+
+    private lateinit var adapter: JsonAdapter<List<Restaurant?>>
 
     fun renewToken(): LiveData<AuthResponseWrapper>{
         return restaurantsRepository.refreshToken()
@@ -71,10 +77,31 @@ class MainViewModel(
         }
     }
 
+    fun getSerializedRestaurants(): String {
+        initMoshiAdapter()
+
+        return adapter.toJson(data)
+    }
+
     fun restaurantsCount(): Int = data.size
 
     fun insertLoadingItemInRestaurantsList() = data.add(null)
 
+    fun getLatitude(): Double = latitude
+
+    fun getLongitude(): Double = longitude
+
+    fun clearData(){
+        data.clear()
+        offset = 0
+    }
+
     private fun removeLoadingItemInRestaurantsList() = data.remove(null)
 
+    private fun initMoshiAdapter(){
+        if (::adapter.isInitialized){
+            return
+        }
+        adapter = MoshiUtils.restaurantsAdapter()
+    }
 }

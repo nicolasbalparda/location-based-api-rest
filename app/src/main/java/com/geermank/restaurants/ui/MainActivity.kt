@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -55,6 +57,8 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        toolbarSetUp()
+
         initLocationManager()
         initViewModel()
 
@@ -65,6 +69,16 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
 
         observeViewModel()
         observeListScrolling()
+
+        maps_fab.setOnClickListener {
+            val restaurants = viewModel.getSerializedRestaurants()
+            goToMapsActivity(restaurants)
+        }
+    }
+
+    private fun toolbarSetUp(){
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = getString(R.string.main_activity_title)
     }
 
     private fun initLocationManager(){
@@ -197,6 +211,18 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
                 // Can't continue without GPS ON
                 locationManager.checkLocationSettings()
             }
+        }else if (requestCode == Constants.RC_CHANGE_LOCATION){
+
+            if (resultCode == Activity.RESULT_OK){
+                val latitude = data?.getDoubleExtra(Constants.EXTRA_USER_LATITUDE,0.0)
+                val longitude = data?.getDoubleExtra(Constants.EXTRA_USER_LONGITUDE,0.0)
+
+                showLoading(true)
+
+                viewModel.storeLocation(latitude,longitude)
+                viewModel.clearData()
+                viewModel.getNearbyRestaurants(false)
+            }
         }
     }
 
@@ -217,11 +243,47 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main_activity,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+
+        when(item?.itemId){
+
+            R.id.action_change_location -> goToMapsActivity(null)
+
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun goToMapsActivity(restaurants: String?){
+
+        val mapsIntent = Intent(this,MapsActivity::class.java)
+
+        if (restaurants != null){
+            mapsIntent.putExtra(Constants.EXTRA_RESTAURANTS,restaurants)
+        }
+
+        mapsIntent.putExtra(Constants.EXTRA_USER_LATITUDE,viewModel.getLatitude())
+        mapsIntent.putExtra(Constants.EXTRA_USER_LONGITUDE,viewModel.getLongitude())
+
+        if (restaurants != null){
+            startActivity(mapsIntent)
+        }else{
+            startActivityForResult(mapsIntent,Constants.RC_CHANGE_LOCATION)
+        }
+    }
+
     private fun showLoading(b: Boolean){
         if(b){
             pb.visibility = View.VISIBLE
+            rv_restaurants.visibility = View.INVISIBLE
         }else{
             pb.visibility = View.INVISIBLE
+            rv_restaurants.visibility = View.VISIBLE
         }
     }
 

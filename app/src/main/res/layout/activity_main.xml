@@ -6,8 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/coordinator"
+    android:fitsSystemWindows="true"
     android:background="@android:color/white"
     tools:context=".ui.MainActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways"
+            style="@style/Toolbar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ProgressBar
         style="@style/ProgressBarRed"
@@ -22,7 +37,8 @@
         android:layout_height="match_parent"
         android:paddingBottom="16dp"
         android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/maps_fab"
@@ -30,9 +46,10 @@
         android:text="@string/main_activity_see_results_map"
         android:textColor="@android:color/white"
         app:iconTint="@android:color/white"
-        app:icon="@drawable/ic_place_dark_gray"
+        app:rippleColor="@android:color/darker_gray"
+        app:icon="@drawable/ic_place_dark_red"
         app:backgroundTint="@android:color/black"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|bottom"
