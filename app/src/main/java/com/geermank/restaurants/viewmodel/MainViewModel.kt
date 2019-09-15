@@ -26,14 +26,14 @@ class MainViewModel(
 
     var loadingMoreItems: Boolean = false
 
-    private val executorService = Executors.newSingleThreadExecutor()
-
-    private val restaurantsRepository = RestaurantsRepository(preferences)
-
     private var data: MutableList<Restaurant?> = ArrayList()
     private var offset: Int = 0
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
+
+    private val restaurantsRepository = RestaurantsRepository(preferences)
+
+    private val executorService = Executors.newSingleThreadExecutor()
 
     private lateinit var adapter: JsonAdapter<List<Restaurant?>>
 
@@ -46,6 +46,16 @@ class MainViewModel(
         this.longitude = longitude ?: 0.0
     }
 
+    /**
+     * This method handle API calls to get restaurants. Notifies view once it gets
+     * a response, whether it's successful or an error.
+     *
+     * If it is loading more items, this method also removes the loading item (a null value)
+     * added to the list, in order to hide bottom ProgressBar in RecyclerView
+     *
+     * @param loadMoreItems determine whether the API request is to add more items
+     * to the previously added, or it's the first request
+     */
     fun getNearbyRestaurants(loadMoreItems: Boolean) {
 
         loadingMoreItems = loadMoreItems

@@ -22,9 +22,17 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_maps.*
 
+/**
+ * This Activity has to functionalities: show to the user the location of the previously
+ * got restaurants in a map, and also to allow user to manually change his location
+ */
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+
+    /**
+     * Map marker to display current user position
+     */
     private var userMarker: Marker? = null
 
     private lateinit var restaurants: List<Restaurant?>
@@ -32,6 +40,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var userLatitude: Double = 0.0
     private var userLongitude: Double = 0.0
 
+    /**
+     * Flag to distinguish between the two possible
+     * functions of this Activity
+     */
     private var allowUserToChangeLocation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +53,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         initRestaurants()
         initUserLocation()
 
+        /*
+         To distinguish between the two functionalities of this activity,
+         check if a list of restaurants is got in Intent extras. If restaurants
+         are sent in Intent extras, then we have to show their position in the map
+
+         If not, we have to allow user to change his location
+         */
         allowUserToChangeLocation = !::restaurants.isInitialized
         showChangeLocationCard()
 
@@ -86,6 +105,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         userLongitude = intent.getDoubleExtra(Constants.EXTRA_USER_LONGITUDE,0.0)
     }
 
+    /**
+     * Restaurants list is passed as a JSON
+     */
     private fun deserializeRestaurants(restaurants: String): List<Restaurant?>{
         val adapter = MoshiUtils.restaurantsAdapter()
         return adapter.fromJson(restaurants)!!

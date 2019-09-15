@@ -33,8 +33,8 @@ class LocationManager(
 
     /**
      * This instance is initialized by casting context received
-     * in class constructor. Activity must implements this in order
-     * to use this class
+     * in class constructor. Activity must implement this interface in order
+     * to use LocationManager
      */
     private var listener: OnLocationManagerListener?
 
@@ -57,9 +57,9 @@ class LocationManager(
 
     /**
      * Not always used. It will be needed if last known location is null.
-     * When new location is get, it will be delivered to this callback.
+     * When new location is got, it will be delivered to this callback.
      *
-     * Last known location will be null in some rare cases like in a new device or
+     * Last known location will be null in some rare cases, like in a new device or
      * device restored from factory
      */
     private val locationCallback by lazy {

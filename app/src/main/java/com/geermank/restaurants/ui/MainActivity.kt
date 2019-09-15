@@ -29,6 +29,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListener {
 
+    /**
+     * Auxiliary class to handle location related issues
+     */
     private lateinit var locationManager: LocationManager
 
     //region LocationManager Callbacks
@@ -91,6 +94,11 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
                 .get(MainViewModel::class.java)
     }
 
+    /**
+     * On token response, launch restaurants GET flow. If we got an error
+     * when trying to get a new token, show an error to the user prompting
+     * him to retry token request
+     */
     private fun renewToken(){
         viewModel.renewToken().observe(this, Observer { response ->
 
@@ -141,8 +149,8 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
             setRestaurantsList(restaurants)
         })
 
-        viewModel.localizedError.observe(this, Observer { error ->
-            showError(error){ viewModel.getNearbyRestaurants(viewModel.loadingMoreItems) }
+        viewModel.localizedError.observe(this, Observer { localizedMessage ->
+            showError(localizedMessage){ viewModel.getNearbyRestaurants(viewModel.loadingMoreItems) }
         })
 
         viewModel.error.observe(this, Observer { error ->
@@ -160,6 +168,12 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
         }
     }
 
+    /**
+     * Observe RecyclerView scrolling, to find out when we reach the end of the list
+     * Once the end has been reached, load more restaurants from the service.
+     *
+     * On list scrolling, also hide fab when going down, and show it when going up.
+     */
     private fun observeListScrolling(){
 
         val layoutManager = rv_restaurants.layoutManager as LinearLayoutManager
@@ -189,6 +203,13 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
         }
     }
 
+    /**
+     * When the end of the restaurants list has been reached, we have to load
+     * more restaurants from the service. To achieve this, first insert a
+     * "loading item" to the list (a null value) and notify adapter that this
+     * item has been added. This will make RecyclerView to show a ProgressBar
+     * in the end of the list
+     */
     private fun loadMoreRestaurants(){
         viewModel.insertLoadingItemInRestaurantsList()
         adapter.notifyItemInserted(viewModel.restaurantsCount() - 1)
@@ -220,6 +241,9 @@ class MainActivity : AppCompatActivity(), LocationManager.OnLocationManagerListe
                 showLoading(true)
 
                 viewModel.storeLocation(latitude,longitude)
+
+                // On user location changed, clear previously obtained
+                // obtained restaurants and offset before getting new ones
                 viewModel.clearData()
                 viewModel.getNearbyRestaurants(false)
             }

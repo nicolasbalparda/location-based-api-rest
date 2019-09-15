@@ -8,6 +8,7 @@
     <string name="main_activity_see_results_map">Ver ubicación</string>
     <string name="title_activity_maps">Maps</string>
     <string name="your_location">Tu ubicación</string>
+    <string name="change_location">Modificar mi ubicación</string>
 
     <!-- Requests result strings -->
     <string name="request_successful">Datos obtenidos con éxito</string>
@@ -27,6 +28,5 @@
     <string name="maps_activity_tv_confirm_location_title">¿Es esta tu ubicación?</string>
     <string name="maps_activity_tv_confirm_location_description">Necesitamos confirmar tu ubicación para una mejor experiencia</string>
     <string name="maps_activity_btn_confirm_location">Confirmar ubicación</string>
-    <string name="change_location">Modificar mi ubicación</string>
 
 </resources>
